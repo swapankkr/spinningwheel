@@ -17,11 +17,31 @@ $items = query("SELECT * FROM wheel_members WHERE wheel_id = $wheel_id");
     <link rel="stylesheet" href="plugins/toastr/toastr.min.css">
     <link rel="stylesheet" href="dist/css/adminlte.min.css">
     <style>
+        .form-control, .card, .form-control:focus{
+            background-color: #3b3f4b;
+            color: #fff !important;
+        }
+        .card a{
+            color: #fff !important;
+        }
+        header i{
+            color: #007bff !important;
+        }
+        body{
+            background-color: #1f2130 !important;
+        }
+        .bg-light{
+            color: #fafcff !important;
+            background-color: #1f2130 !important;
+        }
+        .bg-light > a{
+            color: #fafcff !important;
+        }
         .main-cointainer {
             max-width: 560px;
             width: 100%;
             margin: auto;
-            height: 100vh;
+            height: 90vh;
             position: relative;
         }
 
@@ -36,13 +56,13 @@ $items = query("SELECT * FROM wheel_members WHERE wheel_id = $wheel_id");
         }
 
         body {
-            background-color: rgba(125, 3, 123, 0.119);
+            background-color: white;
             color: black;
         }
 
         main {
             overflow: auto;
-            height: calc(100vh - 200px);
+            height: calc(90vh - 200px);
         }
 
         .cursor-pointer {
@@ -61,15 +81,62 @@ $items = query("SELECT * FROM wheel_members WHERE wheel_id = $wheel_id");
             width: 100%;
             height: 110px;
         }
+        
+        /* color picker */
+        .color-picker {
+            position: absolute;
+            height: 90vh;
+            width: 100%;
+            bottom: 0;
+            z-index: 10000;
+            background-color: white;
+            display: none;
+            transition: 500ms;
+            opacity: 0;
+        }
+        .color-picker.show{
+            display: block;
+            opacity: 1;
+        }
+        .color-item {
+            height: 55px;
+            border-radius: 10px;
+            box-shadow: 1px 1px 5px 1px #ddd;
+        }
+        .color-item.active::before{
+            position: relative;
+            height: 100%;
+            width: 100%;
+            content: '\2713';
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            border: 1px solid gray;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0px 0px 2px black;
+        }
+
+        .color-grid {
+            display: grid;
+            grid-template-columns: auto auto auto auto auto;
+            gap: 20px;
+            height: calc(90vh - 70px);
+            overflow: auto;
+            padding: 10px 0;
+        }
+
+        /**/
     </style>
 </head>
 
 <body>
-    <div class="main-cointainer bg-light shadow">
+    <div class="main-cointainer">
         <form autocomplete="off" id="add_wheel_form">
             <input type="hidden" name="id" value="<?php echo $wheel->id;?>">
-            <header>
-                <div class="d-flex w-100 justify-content-between align-items-center bg-light p-4 shadow" style="gap: 20px;">
+            <header class="shadow-lg">
+                <div class="d-flex w-100 justify-content-between align-items-center bg-light p-4" style="gap: 20px;">
                     <a href="index.php" title="Settings">
                         <i class="fas fa-times"></i>
                     </a>
@@ -81,15 +148,15 @@ $items = query("SELECT * FROM wheel_members WHERE wheel_id = $wheel_id");
                 <div class="w-100 p-4 sortable">
                     <?php foreach($items as $index => $item) {
                         $color = $item->color; ?>
-                        <div class="d-flex justify-content-between align-items-center px-1 mb-2" style="gap: 15px;" index="<?php echo $index; ?>">
+                        <div class="d-flex justify-content-between align-items-center mb-2" style="gap: 10px;" index="<?php echo $index; ?>">
                             <div class="drag-handler cursor-pointer">
                                 <i class="fas fa-grip-horizontal text-gray" style="font-size: 25px;" title="Drag"></i>
                             </div>
-                            <label class="color-box" for="color_<?php echo $index; ?>" style="background-color: <?php echo $color ?>;"><input type="color" name="item[<?php echo $index; ?>][color]" id="color_<?php echo $index; ?>" class="d-none color" value="<?php echo $color ?>"></label>
+                            <label class="color-box" for="color_<?php echo $index; ?>" style="background-color: <?php echo $color ?>;" data-color="<?php echo $color ?>"><input type="hidden" name="item[<?php echo $index; ?>][color]" class="color" value="<?php echo $color ?>"></label>
                             <input type="text" placeholder="Slice text" class="form-control name" name="item[<?php echo $index; ?>][name]"
                                 style="flex-grow:1; min-width: auto;" value="<?php echo $item->name; ?>">
-                            <input type="number" placeholder="Weight" class="form-control weight" name="item[<?php echo $index; ?>][weight]"
-                                style="width: 100px;" value="<?php echo $item->weight; ?>">
+                            <input type="hidden" placeholder="Weight" class="form-control weight" name="item[<?php echo $index; ?>][weight]"
+                                style="width: 75px;" value="<?php echo $item->weight; ?>">
                             <div>
                                 <a href="javascript:void(0)" class="remove-icon text-danger" style="font-size: 25px;" title="Delete">
                                     <i class="fas fa-ban"></i>
@@ -108,14 +175,29 @@ $items = query("SELECT * FROM wheel_members WHERE wheel_id = $wheel_id");
                 </div>
             </footer>
         </form>
+        <div class="color-picker">
+            <div class="d-flex justify-content-between align-items-center px-4 py-2">
+                <h4>Pick a Colour</h4>
+                <a href="javascript:void(0)" class="close-color-picker text-danger" style="font-size: 25px;" title="Close">
+                    <i class="fas fa-times"></i>
+                </a>
+            </div>
+            <div class="color-grid px-4">
+                <?php foreach(json_decode(color()) as $colorCode): ?>
+                <div class="color-item" data-color="<?php echo $colorCode;?>" style="background-color: <?php echo $colorCode;?>;"></div>
+                <?php endforeach;?>
+            </div>
+        </div>
     </div>
     <script src="plugins/jquery/jquery.min.js"></script>
     <script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="plugins/toastr/toastr.min.js"></script>
     <script src="dist/js/adminlte.min.js"></script>
     <script src="plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
     <script>
         window.addEventListener('DOMContentLoaded', function() {
+            let nextColorIndex = <?php echo $index+1; ?>;
             const init_listeners = item => {
                 index = item.getAttribute('index');
                 item.querySelector('.remove-icon').addEventListener('click', () => {
@@ -128,8 +210,12 @@ $items = query("SELECT * FROM wheel_members WHERE wheel_id = $wheel_id");
                 item.querySelector('input.weight').addEventListener('input', function(event) {
                     item.querySelector('input.weight').value = item.querySelector('input.weight').value.replace(/[^0-9]/g, '');
                 });
-                item.querySelector('input.color').addEventListener('change', () => {
-                    item.querySelector('.color-box').style.backgroundColor = item.querySelector('input.color').value;
+                
+                $(item.querySelector('.color-box')).click((event) => {
+                    let currentColor = event.target.getAttribute('data-color');
+                    window.colorPickForElement =  event.target;
+                    $('.color-picker').addClass('show');
+                    $(`.color-picker [data-color="${currentColor}"]`).addClass('active');
                 });
 
                 $('.sortable').sortable({
@@ -143,20 +229,21 @@ $items = query("SELECT * FROM wheel_members WHERE wheel_id = $wheel_id");
             }
             $('#add_new_item_btn').click(() => {
                 const item = document.createElement('div');
-                const color = hslToHex(Math.random() * 360, 70, 60);
                 const index = $('#wheel_list > div').children().length;
-                item.setAttribute('class', "d-flex justify-content-between align-items-center px-1 mb-2")
+                const colorIndex = ((nextColorIndex++) % colors.length);
+                const color = colors[colorIndex] /*hslToHex(Math.random() * 360, 70, 60)*/ ;
+                item.setAttribute('class', "d-flex justify-content-between align-items-center mb-2")
                 item.setAttribute('index', index)
-                item.style.gap = '15px';
+                item.style.gap = '10px';
                 item.innerHTML = `
                     <div class="drag-handler cursor-pointer">
                         <i class="fas fa-grip-horizontal text-gray" style="font-size: 25px;" title="Drag"></i>
                         </div>
-                        <label class="color-box" for="color_${index}"><input type="color" name="item[${index}][color]" id="color_${index}" class="d-none color" value="${color}"></label>
+                        <label class="color-box" for="color_${index}" data-color="${color}"><input type="hidden" name="item[${index}][color]" class="color" value="${color}"></label>
                         <input type="text" placeholder="Slice text" class="form-control name" name="item[${index}][name]"
                             style="flex-grow:1; min-width: auto;">
-                        <input type="number" placeholder="Weight" class="form-control weight" name="item[${index}][weight]"
-                            style="width: 100px;">
+                        <input type="hidden" placeholder="Weight" class="form-control weight" name="item[${index}][weight]"
+                            style="width: 75px;" value="1">
                         <div>
                         <a href="javascript:void(0)" class="remove-icon text-danger" style="font-size: 25px;" title="Delete">
                             <i class="fas fa-ban"></i>
@@ -170,6 +257,8 @@ $items = query("SELECT * FROM wheel_members WHERE wheel_id = $wheel_id");
             });
 
             $('#add_wheel_form').submit((event) => {
+                console.log(121);
+                
                 event.preventDefault();
                 $('#submit_wheel').prop('disabled', true);
                 $.ajax({
@@ -238,6 +327,27 @@ $items = query("SELECT * FROM wheel_members WHERE wheel_id = $wheel_id");
 
                 return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
             }
+
+            const colors = <?php echo color(); ?>;
+            
+            /* Color picker */
+            $('.close-color-picker').click(()=> {
+                $('.color-picker').removeClass('show');
+                $(`.color-picker [data-color]`).removeClass('active');
+            });
+
+            $(`.color-picker [data-color]`).each((index, element) => {
+                element.onclick= (event)=>{
+                    let selectedColor = event.target.getAttribute('data-color');   
+                    window.colorPickForElement.style.backgroundColor = selectedColor;
+                    window.colorPickForElement.setAttribute('data-color', selectedColor);
+                    window.colorPickForElement.querySelector('input.color').value = selectedColor;
+                    $('.color-picker').removeClass('show');
+                    $(`.color-picker [data-color]`).removeClass('active');
+                }
+            });
+            
+            /**/ 
         });
     </script>
 </body>

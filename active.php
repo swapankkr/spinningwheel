@@ -1,106 +1,70 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme" content="black">
-  <title>Spinning Wheel | Dashboard</title>
-  <link rel="stylesheet"
-    href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-  <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
-  <link rel="stylesheet" href="dist/css/adminlte.min.css">
-</head>
-
-<body class="hold-transition sidebar-mini bg-dark">
-  <div class="wrapper">
-    <nav class="main-header navbar navbar-expand navbar-dark navbar-light">
-
-      <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
-        </li>
-      </ul>
-
-      <ul class="navbar-nav ml-auto">
-        <li class="nav-item">
-          <h5 class="pt-2">Hello, Buddy</h5>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link text-danger" data-widget="control-sidebar" data-slide="true" href="#" role="button">
-            Log out <i class="fas fa-sign-out-alt"></i>
-          </a>
-        </li>
-      </ul>
-    </nav>
-
-    <aside class="main-sidebar sidebar-dark-primary elevation-4">
-      <div class="sidebar">
-        <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-          <div class="image text-center">
-            <img src="dist/img/logo.png" class="img-circle" alt="Logo" style="width: 50%;">
-          </div>
-        </div>
-        <nav class="mt-2">
-          <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-            <li class="nav-item">
-              <a href="dashboard.html" class="nav-link">
-                <i class="nav-icon fas fa-cubes"></i>
-                <p>
-                  Dashboard
-                </p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="active.html" class="nav-link active">
-                <i class="nav-icon fas fa-spinner"></i>
-                <p>
-                  Active Wheels
-                </p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="result.html" class="nav-link">
-                <i class="nav-icon fas fa-circle-notch"></i>
-                <p>
-                  Spinning Results
-                </p>
-              </a>
-            </li>
-          </ul>
-        </nav>
-      </div>
-    </aside>
+<?php $page="active"; require_once "./includes/header.php";
+$wheels_members = query("SELECT W.id, W.name, W.winner, WM.id as item_id, WM.name as item_name, WM.color FROM wheels as W INNER JOIN wheel_members as WM ON WM.wheel_id = W.id WHERE result IS NULL ORDER BY W.datetime DESC, W.id ASC");
+$wheels = [];
+$slices = [];
+foreach($wheels_members as $wheel_member){
+  $wheels[$wheel_member->id] = (object)['id' => $wheel_member->id, 'name' => $wheel_member->name, 'winner' => $wheel_member->winner ];
+  $slices[$wheel_member->id][] = (object)['id' => $wheel_member->item_id, 'name' => $wheel_member->item_name, 'color' => $wheel_member->color];
+}
+$wheels = array_values($wheels);
+?>
     <div class="content-wrapper bg-black">
       <section class="content">
         <div class="container-fluid pt-4">
+          <?php foreach($wheels as $index => $wheel): ?>
           <div class="row">
-            <div class="col-6">
-              <div class="small-box bg-dark">
+            <div class="col-12">
+              <div class="small-box" style="background-color: <?php echo color($index)?>ff;">
                 <div class="inner">
-                  <span>Actoive Wheels</span>
-                  <h3>2</h3>
+                  <h5><?php echo $wheel->name;?></h5>
+                  <span><?php echo count($slices[$wheel->id]);?> Slices</span>
                 </div>
-                <a href="active.html" class="small-box-footer">Actoive Wheels <i class="fas fa-arrow-circle-right"></i></a>
-              </div>
-            </div>
-            <div class="col-6">
-              <div class="small-box bg-dark">
-                <div class="inner">
-                  <span>Spinning Results</span>
-                  <h3>12</h3>
-                </div>
-                <a href="result.html" class="small-box-footer">Spinning Results <i class="fas fa-arrow-circle-right"></i></a>
+                <select class="small-box-footer w-100 d-block border-0 text-align select-winner" style="background-color: rgba(0,0,0,.7);" data-id="<?php echo $wheel->id;?>">
+                  <option>Select Winner</option>
+                  <?php foreach($slices[$wheel->id] as $slice): ?>
+                  <option value="<?php echo $slice->id;?>" style="background-color: #fff; color: <?php echo $slice->color;?>; font-weight: bold;" <?php echo $wheel->winner== $slice->id ? 'selected' : '';?>><?php echo $slice->name ? $slice->name : '-- no slice name --';?></option>
+                  <?php endforeach; ?>
+                </select>
               </div>
             </div>
           </div>
+          <?php endforeach; ?>
+          <?php if(empty($wheels)) :?>
+            <div class="row">
+            <div class="col-12">
+              <div class="small-box bg-dark">
+                <div class="inner">
+                  <span>No wheels found</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <?php endif; ?>
         </div>
       </section>
     </div>
   </div>
-  <script src="plugins/jquery/jquery.min.js"></script>
-  <script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="dist/js/adminlte.min.js"></script>
-</body>
-
-</html>
+  <?php require_once "./includes/footer.php";?>
+  <script>
+    document.addEventListener('DOMContentLoaded', function(){
+      $('.select-winner').change(function(event){
+        let formdata = new FormData();
+        formdata.append('id', event.target.getAttribute('data-id'));
+        formdata.append('winner', event.target.value);
+        $.ajax({
+            url: 'script/winner.php',
+            method: 'post',
+            data: formdata,
+            processData: false,
+            contentType: false,
+            dataType: 'json',
+            success: (response) => {
+                toastr.info('Winner selected successfully');
+            },
+            error: (error) => {
+                toastr.error(error.statusText);
+            }
+        });
+      });
+    });
+  </script>

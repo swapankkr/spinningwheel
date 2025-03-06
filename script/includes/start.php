@@ -43,10 +43,25 @@ function user(){
         if($id = query("INSERT INTO users (name, email, password, role, created_at) VALUES('{$user['name']}', '', '', 'user', '$datetime')")){
             $user['id'] = $id;
         }
-        setcookie('__spinning_wheel_profile', base64_encode(json_encode($user)));
+        setcookie('__spinning_wheel_profile', base64_encode(json_encode($user)), time() + 2592000);
         return (object)$user;
     }else{
         return json_decode(base64_decode($_COOKIE['__spinning_wheel_profile']));
+    }
+}
+function app_user(){
+    if(!isset($_GET['token'])){
+        $user = ['id' => '','name'=> 'User '. uniqid(), 'time' => time(), 'email' => ''];
+        $datetime = date('Y-m-d H:s:i');
+        if($id = query("INSERT INTO users (name, email, password, role, created_at) VALUES('{$user['name']}', '', '', 'user', '$datetime')")){
+            $user = query('SELECT * FROM users WHERE name = "'.$user['name'].'"');
+            $user[0]->token = $user[0]->name;
+            return $user[0];
+        }
+    }else{
+        $user = query('SELECT * FROM users WHERE name = "'.$_GET['token'].'"');
+        $user[0]->token = $_GET['token'];
+        return $user[0];
     }
 }
 
@@ -100,4 +115,60 @@ function hslToHex($h, $s, $l) {
     $bHex = str_pad(dechex($b), 2, '0', STR_PAD_LEFT);
 
     return "#" . $rHex . $gHex . $bHex;
+}
+
+function color(int | string $index = "ALL") {
+    $colors = [
+        "#fb6e74",
+        "#fbe05d",
+        "#8aecb3",
+        "#80e2fb",
+        "#b48cee",
+        "#f784bb",
+        "#f9bc51",
+        "#52bc7a",
+        "#7b9ce9",
+        "#b473c3",
+        "#f66e78",
+        "#faa94e",
+        "#87e0a0",
+        "#81ebf9",
+        "#b087cb",
+        "#f95e7d",
+        "#f2e45d",
+        "#74ce98",
+        "#1ee2de",
+        "#a680bb",
+        "#f5515a",
+        "#e8d26c",
+        "#61b584",
+        "#7bdbd7",
+        "#9f70a7",
+        "#f47f9c",
+        "#e8b951",
+        "#8bc53d",
+        "#71ccbd",
+        "#7b71c8",
+        "#df76a1",
+        "#f89753",
+        "#84b537",
+        "#61d0e3",
+        "#6b66b6",
+        "#de5eb3",
+        "#f6a800",
+        "#7aa52f",
+        "#0daffa",
+        "#554ba2",
+        "#f343d2",
+        "#ee9118",
+        "#778e22",
+        "#048ce4",
+        "#454092",
+        "#f240a2",
+        "#db7a19",
+        "#626e2c",
+        "#ffffff",
+        "#000000"
+    ];
+    return $index === "ALL" ? json_encode($colors) : $colors[$index % count($colors)];
 }

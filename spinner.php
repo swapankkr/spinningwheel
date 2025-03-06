@@ -4,6 +4,7 @@ $wheel_id = isset($_GET['id']) ? $_GET['id'] : header('Location: index.php');
 $selected_wheel = query("SELECT * FROM wheels WHERE id = '$wheel_id'");
 $wheels = query("SELECT * FROM wheels WHERE user_id = '$user->id'");
 $items = query("SELECT * FROM wheel_members WHERE wheel_id = '$wheel_id'");
+$winner_index = NULL;
 ?>
 
 <!DOCTYPE html>
@@ -18,11 +19,31 @@ $items = query("SELECT * FROM wheel_members WHERE wheel_id = '$wheel_id'");
     <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
     <link rel="stylesheet" href="dist/css/adminlte.min.css">
     <style>
+        .form-control, .card, .form-control:focus{
+            background-color: #3b3f4b;
+            color: #fff;
+        }
+        header li{
+            color: #007bff !important;
+        }
+        header i{
+            color: #007bff !important;
+        }
+        body{
+            background-color: #1f2130;
+        }
+        .bg-light{
+            color: #fafcff !important;
+            background-color: #1f2130 !important;
+        }
+        .bg-light > a{
+            color: #fafcff !important;
+        }
         .main-cointainer {
             max-width: 560px;
             width: 100%;
             margin: auto;
-            height: 100vh;
+            height: 90vh;
             position: relative;
         }
 
@@ -37,7 +58,7 @@ $items = query("SELECT * FROM wheel_members WHERE wheel_id = '$wheel_id'");
         }
 
         body {
-            background-color: rgba(125, 3, 123, 0.119);
+            background-color: white;
             color: black;
         }
 
@@ -57,15 +78,15 @@ $items = query("SELECT * FROM wheel_members WHERE wheel_id = '$wheel_id'");
             direction: ltr;
             display: grid;
             position: relative;
-            width: 65%;
+            width: 75%;
             margin: auto !important;
-            border: 10px solid rgb(28, 27, 32) !important;
+            border: 10px solid #3c3e4d !important;
             border-radius: 50%;
-            box-shadow: 0px 0px 10px 1px rgb(64, 61, 61);
+            box-shadow: 0px 0px 10px 1px rgb(0, 0, 0);
 
             &::after {
                 aspect-ratio: 1/cos(30deg);
-                background-color: gold;
+                background-color: #fff;
                 clip-path: polygon(50% 100%, 100% 0, 0 0);
                 content: "";
                 height: 5cqi;
@@ -73,6 +94,19 @@ $items = query("SELECT * FROM wheel_members WHERE wheel_id = '$wheel_id'");
                 place-self: start center;
                 scale: 2.5;
                 top: -15px;
+                z-index: 4;
+            }
+            &::before {
+                aspect-ratio: 1/cos(30deg);
+                background-color: #000;
+                clip-path: polygon(50% 100%, 100% 0, 0 0);
+                content: "";
+                height: 5cqi;
+                position: absolute;
+                place-self: start center;
+                scale: 2.8;
+                top: -15px;
+                z-index: 3;
             }
 
             &>* {
@@ -81,7 +115,7 @@ $items = query("SELECT * FROM wheel_members WHERE wheel_id = '$wheel_id'");
 
             button {
                 aspect-ratio: 1 / 1;
-                background: hsla(0, 0%, 3%);
+                background: #3c3e4d;
                 border: 0;
                 border-radius: 50%;
                 cursor: pointer;
@@ -117,8 +151,8 @@ $items = query("SELECT * FROM wheel_members WHERE wheel_id = '$wheel_id'");
                     transform-origin: center right;
                     user-select: none;
                     width: 50cqi;
-                    color: black;
-                    text-shadow: 0px 0px 5px white;
+                    color: #fff;
+                    /* text-shadow: 0px 0px 5px white; */
                 }
             }
         }
@@ -154,7 +188,7 @@ $items = query("SELECT * FROM wheel_members WHERE wheel_id = '$wheel_id'");
                 <h3 style="text-align: center; color: aliceblue; margin-bottom: 45px; font-size: 50px;" id="winner-box">&nbsp;</h3>
                 <fieldset class="ui-wheel-of-fortune" style="--_items: <?php echo count($items); ?>;">
                     <ul>
-                    <?php foreach($items as $index => $item) : ?>
+                    <?php foreach($items as $index => $item) : $winner_index = $selected_wheel[0]->winner == $item->id ? $index : $winner_index; ?>
                         <li style="--_idx: <?php echo $index+1;?>; --_color: <?php echo $item->color;?>;"><?php echo $item->name;?></li>
                         <?php endforeach; ?>
                     </ul>
@@ -180,6 +214,17 @@ $items = query("SELECT * FROM wheel_members WHERE wheel_id = '$wheel_id'");
                 </div>
             </div>
         </footer>
+        <?php 
+
+                if($winner_index !== NULL){
+                    $errorDeg = (90 + (360 / count($items) / 2));
+                    $minDeg = $errorDeg - ($winner_index * 360 / count($items)) + 360;
+                    $maxDeg = $errorDeg - (($winner_index + 1) * 360 / count($items)) + 360;
+                    $min = min($minDeg, $maxDeg)+1;
+                    $max = max($minDeg, $maxDeg)-1;
+                }
+
+            ?>
     </div>
     <script src="plugins/jquery/jquery.min.js"></script>
     <script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -211,7 +256,12 @@ $items = query("SELECT * FROM wheel_members WHERE wheel_id = '$wheel_id'");
                         animation.cancel(); // Reset the animation if it already exists
                     }
                     const randomAdditionalDegrees = Math.random() * 360 + 3600;
-                    const newEndDegree = previousEndDegree + randomAdditionalDegrees;
+                    let newEndDegree;
+                    <?php if($winner_index !== NULL): ?>
+                    newEndDegree = previousEndDegree + (Math.floor(Math.random() * (<?php echo $max;?> - <?php echo $min;?> + 1) + <?php echo $min;?>) + 3600) - (previousEndDegree%360);
+                    <?php else: ?>
+                    newEndDegree = previousEndDegree + randomAdditionalDegrees;
+                    <?php endif; ?>
                     const spinDegError = 90 + (360 / total) / 2;
                     resultIndex = Math.floor(total - ((newEndDegree - spinDegError) % 360) / (360 / total));
                     animation = wheel.animate([{
@@ -236,6 +286,16 @@ $items = query("SELECT * FROM wheel_members WHERE wheel_id = '$wheel_id'");
 
                 function show_winner(id) {
                     $('#winner-box').css('color', wheelItems[id].color).html(wheelItems[id].name)
+                    let formdata = new FormData();
+                    formdata.append('id', <?php echo $wheel_id;?>);
+                    formdata.append('result', wheelItems[id].name);
+                    $.ajax({
+                        url: 'script/result.php',
+                        method: 'post',
+                        data: formdata,
+                        processData: false,
+                        contentType: false
+                    });
                 }
             }
 

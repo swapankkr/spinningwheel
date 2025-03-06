@@ -1,5 +1,5 @@
 <?php require_once './script/includes/start.php';
-$user = user(); $wheels = query("SELECT * FROM wheels WHERE user_id = $user->id"); ?>
+$user = user(); $wheels = query("SELECT * FROM wheels WHERE user_id = '$user->id'"); ?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -12,6 +12,26 @@ $user = user(); $wheels = query("SELECT * FROM wheels WHERE user_id = $user->id"
     <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
     <link rel="stylesheet" href="dist/css/adminlte.min.css">
     <style>
+        .form-control, .card, .form-control:focus{
+            background-color: #3b3f4b;
+            color: #fff !important;
+        }
+        .card a{
+            color: #fff !important;
+        }
+        header i{
+            color: #007bff !important;
+        }
+        body{
+            background-color: #1f2130 !important;
+        }
+        .bg-light{
+            color: #fafcff !important;
+            background-color: #1f2130 !important;
+        }
+        .bg-light > a{
+            color: #fafcff !important;
+        }
         .main-cointainer {
             max-width: 560px;
             width: 100%;

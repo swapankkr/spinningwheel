@@ -11,23 +11,29 @@
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
   <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
+  <link rel="stylesheet" href="plugins/toastr/toastr.min.css">
   <link rel="stylesheet" href="dist/css/adminlte.min.css">
+  <style>
+    .toast{
+      opacity: 1 !important;
+    }
+  </style>
 </head>
 
-<body class="hold-transition sidebar-mini bg-dark">
+<body class="hold-transition sidebar-collapse">
   <div class="wrapper">
-    <nav class="main-header navbar navbar-expand navbar-dark navbar-light">
+    <nav class="main-header navbar navbar-expand navbar-light">
 
-      <ul class="navbar-nav">
+      <!-- <ul class="navbar-nav">
         <li class="nav-item">
           <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
         </li>
-      </ul>
+      </ul> -->
 
       <ul class="navbar-nav ml-auto">
-        <li class="nav-item">
+        <!-- <li class="nav-item">
           <h5 class="pt-2">Hello, <?php echo admin()->name; ?></h5>
-        </li>
+        </li> -->
         <li class="nav-item">
           <a class="nav-link text-danger" href="/script/logout.php">
             Log out <i class="fas fa-sign-out-alt"></i>
@@ -36,7 +42,7 @@
       </ul>
     </nav>
 
-    <aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- <aside class="main-sidebar sidebar-dark-primary elevation-4">
       <div class="sidebar">
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
           <div class="image text-center">
@@ -46,7 +52,7 @@
         <nav class="mt-2">
           <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
             <li class="nav-item">
-              <a href="dashboard.php" class="nav-link active">
+              <a href="dashboard.php" class="nav-link <?php echo $page=="dashboard" ? 'active': ''?>">
                 <i class="nav-icon fas fa-cubes"></i>
                 <p>
                   Dashboard
@@ -54,7 +60,7 @@
               </a>
             </li>
             <li class="nav-item">
-              <a href="active.php" class="nav-link">
+              <a href="active.php" class="nav-link <?php echo $page=="active" ? 'active': ''?>">
                 <i class="nav-icon fas fa-spinner"></i>
                 <p>
                   Active Wheels
@@ -62,7 +68,7 @@
               </a>
             </li>
             <li class="nav-item">
-              <a href="result.php" class="nav-link">
+              <a href="result.php" class="nav-link <?php echo $page=="result" ? 'active': ''?>">
                 <i class="nav-icon fas fa-circle-notch"></i>
                 <p>
                   Spinning Results
@@ -72,4 +78,4 @@
           </ul>
         </nav>
       </div>
-    </aside>
+    </aside> -->
